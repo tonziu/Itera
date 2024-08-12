@@ -1,73 +1,35 @@
 #include <iostream>
 
 #include <math/matrix.h>
+#include <network/denselayer.h>
+#include <network/neuralnetwork.h>
 
 using namespace math;
 
 int main(void)
 {
-    math::Matrix mat;
+    network::NeuralNetwork network;
+    network::DenseLayer layer_a(2, 3, matrix_relu_in_place);
+    network::DenseLayer layer_b(3, 1, matrix_tanh_in_place);
+    
+    network.Add_Layer(layer_a);
+    network.Add_Layer(layer_b);
 
-    // Allocate a 2x3 matrix
-    math::matrix_alloc(mat, 2, 3);
+    // Initialize input matrix
+    math::Matrix input;
+    math::matrix_alloc(input, 1, 2);
+    input.data[0] = 1.0;
+    input.data[1] = -2.0;
 
-    // Initialize the matrix with known values
-    mat.data[0] = 1.0;
-    mat.data[1] = -2.0;
-    mat.data[2] = 0.5;
-    mat.data[3] = 3.0;
-    mat.data[4] = -1.0;
-    mat.data[5] = 2.0;
+    // Perform forward pass
+    Matrix output;
+    matrix_alloc(output, input.rows, layer_b.Get_Output().cols);
+    
+    output = network.forward(input);
 
-    std::cout << "Original matrix:" << std::endl;
-    matrix_print(mat);
-
-    // Apply ReLU
-    math::matrix_relu_in_place(mat);
-    std::cout << "After ReLU:" << std::endl;
-    matrix_print(mat);
-
-    // Reinitialize matrix with original values for demonstration
-    mat.data[0] = 1.0;
-    mat.data[1] = -2.0;
-    mat.data[2] = 0.5;
-    mat.data[3] = 3.0;
-    mat.data[4] = -1.0;
-    mat.data[5] = 2.0;
-
-    // Apply Sigmoid
-    math::matrix_sigmoid_in_place(mat);
-    std::cout << "After Sigmoid:" << std::endl;
-    matrix_print(mat);
-
-    // Reinitialize matrix with original values for demonstration
-    mat.data[0] = 1.0;
-    mat.data[1] = -2.0;
-    mat.data[2] = 0.5;
-    mat.data[3] = 3.0;
-    mat.data[4] = -1.0;
-    mat.data[5] = 2.0;
-
-    // Apply Tanh
-    math::matrix_tanh_in_place(mat);
-    std::cout << "After Tanh:" << std::endl;
-    matrix_print(mat);
-
-    // Reinitialize matrix with original values for demonstration
-    mat.data[0] = 1.0;
-    mat.data[1] = -2.0;
-    mat.data[2] = 0.5;
-    mat.data[3] = 3.0;
-    mat.data[4] = -1.0;
-    mat.data[5] = 2.0;
-
-    // Apply Softmax
-    math::matrix_softmax_in_place(mat);
-    std::cout << "After Softmax:" << std::endl;
-    matrix_print(mat);
-
-    // Free allocated memory
-    math::matrix_free(mat);
+    // Print the output matrix
+    std::cout << "Output matrix:" << std::endl;
+    matrix_print(output);
 
     return 0;
 }

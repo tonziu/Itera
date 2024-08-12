@@ -4,6 +4,8 @@
 #include <cassert>
 #include <cstdlib>
 #include <vector>
+#include <random>
+#include <ctime>
 
 #include <math/functions.h>
 
@@ -65,7 +67,7 @@ namespace math
     }
 
     // Adds the values of 'b' to 'a' if the matrices have matching sizes.
-    void matrix_add_inplace(Matrix &a, Matrix &b)
+    void matrix_add_in_place(Matrix &a, Matrix &b)
     {
         assert(a.data != nullptr);
         assert(b.data != nullptr);
@@ -312,7 +314,7 @@ namespace math
     }
 
     // Applies softmax to a matrix (not in place).
-    void matrix_softmax(Matrix& out, Matrix &matrix)
+    void matrix_softmax(Matrix &out, Matrix &matrix)
     {
         assert(matrix.data != nullptr);
         assert(out.data != nullptr);
@@ -345,8 +347,13 @@ namespace math
         }
     }
 
+    // Prints matrix data to the standard output.
     void matrix_print(const Matrix &matrix)
     {
+        assert(matrix.data != nullptr);
+        assert(matrix.rows > 0);
+        assert(matrix.cols > 0);
+
         for (int i = 0; i < matrix.rows; ++i)
         {
             for (int j = 0; j < matrix.cols; ++j)
@@ -357,6 +364,18 @@ namespace math
         }
     }
 
+    void matrix_random_in_place(Matrix &m, double lower, double upper)
+    {
+        std::random_device rd;                                          
+        std::mt19937 gen(rd());                                         
+        std::uniform_real_distribution<> dis(lower, upper); 
+
+        for (int i = 0; i < m.rows * m.cols; ++i)
+        {
+            m.data[i] = dis(gen);
+        }
+    }
 }
+
 
 #endif // H_ITERA_MATRIX_H
