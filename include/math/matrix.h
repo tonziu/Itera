@@ -1,5 +1,11 @@
+#ifndef H_ITERA_MATRIX_H
+#define H_ITERA_MATRIX_H
+
 #include <cassert>
 #include <cstdlib>
+#include <vector>
+
+#include <math/functions.h>
 
 namespace math
 {
@@ -127,6 +133,8 @@ namespace math
         result.data = nullptr;
     }
 
+    // Matrix element-wise addition (not in place).
+    // The 'out' matrix should be already allocated using the right sizes.
     void matrix_add(Matrix &out, Matrix &a, Matrix &b)
     {
         assert(out.data != nullptr);
@@ -145,6 +153,8 @@ namespace math
         return;
     }
 
+    // Matrix product (not in place).
+    // The 'out' matrix should be already allocated using the right sizes.
     void matrix_prod(Matrix &out, Matrix &a, Matrix &b)
     {
         assert(out.data != nullptr);
@@ -170,4 +180,183 @@ namespace math
 
         return;
     }
+
+    // Applies RELU to a matrix (in place).
+    void matrix_relu_in_place(Matrix &m)
+    {
+        assert(m.data != nullptr);
+        assert(m.rows > 0);
+        assert(m.cols > 0);
+
+        for (int i = 0; i < m.rows * m.cols; ++i)
+        {
+            m.data[i] = relu(m.data[i]);
+        }
+
+        return;
+    }
+
+    // Applies RELU to a matrix (not in place).
+    void matrix_relu(Matrix &out, Matrix &m)
+    {
+        assert(m.data != nullptr);
+        assert(out.data != nullptr);
+        assert(m.rows > 0);
+        assert(m.cols > 0);
+        assert(out.rows == m.rows);
+        assert(out.cols == m.cols);
+
+        for (int i = 0; i < m.rows * m.cols; ++i)
+        {
+            out.data[i] = relu(m.data[i]);
+        }
+
+        return;
+    }
+
+    // Applies sigmoid to a matrix (in place).
+    void matrix_sigmoid_in_place(Matrix &m)
+    {
+        assert(m.data != nullptr);
+        assert(m.rows > 0);
+        assert(m.cols > 0);
+
+        for (int i = 0; i < m.rows * m.cols; ++i)
+        {
+            m.data[i] = sigmoid(m.data[i]);
+        }
+
+        return;
+    }
+
+    // Applies sigmoid to a matrix (not in place).
+    void matrix_sigmoid(Matrix &out, Matrix &m)
+    {
+        assert(m.data != nullptr);
+        assert(out.data != nullptr);
+        assert(m.rows > 0);
+        assert(m.cols > 0);
+        assert(out.rows == m.rows);
+        assert(out.cols == m.cols);
+
+        for (int i = 0; i < m.rows * m.cols; ++i)
+        {
+            out.data[i] = sigmoid(m.data[i]);
+        }
+
+        return;
+    }
+
+    // Applies tanh to a matrix (in place).
+    void matrix_tanh_in_place(Matrix &m)
+    {
+        assert(m.data != nullptr);
+        assert(m.rows > 0);
+        assert(m.cols > 0);
+
+        for (int i = 0; i < m.rows * m.cols; ++i)
+        {
+            m.data[i] = tanh(m.data[i]);
+        }
+
+        return;
+    }
+
+    // Applies tanh to a matrix (not in place).
+    void matrix_tanh(Matrix &out, Matrix &m)
+    {
+        assert(m.data != nullptr);
+        assert(out.data != nullptr);
+        assert(m.rows > 0);
+        assert(m.cols > 0);
+        assert(out.rows == m.rows);
+        assert(out.cols == m.cols);
+
+        for (int i = 0; i < m.rows * m.cols; ++i)
+        {
+            out.data[i] = tanh(m.data[i]);
+        }
+
+        return;
+    }
+
+    // Applies softmax to a matrix (in place).
+    void matrix_softmax_in_place(Matrix &matrix)
+    {
+        assert(matrix.data != nullptr);
+        assert(matrix.rows > 0);
+        assert(matrix.cols > 0);
+
+        std::vector<double> exp_values(matrix.rows * matrix.cols);
+        double max_value = matrix.data[0];
+
+        for (int i = 0; i < matrix.rows * matrix.cols; ++i)
+        {
+            if (matrix.data[i] > max_value)
+            {
+                max_value = matrix.data[i];
+            }
+        }
+
+        double sum = 0.0;
+        for (int i = 0; i < matrix.rows * matrix.cols; ++i)
+        {
+            exp_values[i] = std::exp(matrix.data[i] - max_value);
+            sum += exp_values[i];
+        }
+
+        for (int i = 0; i < matrix.rows * matrix.cols; ++i)
+        {
+            matrix.data[i] = exp_values[i] / sum;
+        }
+    }
+
+    // Applies softmax to a matrix (not in place).
+    void matrix_softmax(Matrix& out, Matrix &matrix)
+    {
+        assert(matrix.data != nullptr);
+        assert(out.data != nullptr);
+        assert(matrix.rows > 0);
+        assert(matrix.cols > 0);
+        assert(out.rows == matrix.rows);
+        assert(out.cols == matrix.cols);
+
+        std::vector<double> exp_values(matrix.rows * matrix.cols);
+        double max_value = matrix.data[0];
+
+        for (int i = 0; i < matrix.rows * matrix.cols; ++i)
+        {
+            if (matrix.data[i] > max_value)
+            {
+                max_value = matrix.data[i];
+            }
+        }
+
+        double sum = 0.0;
+        for (int i = 0; i < matrix.rows * matrix.cols; ++i)
+        {
+            exp_values[i] = std::exp(matrix.data[i] - max_value);
+            sum += exp_values[i];
+        }
+
+        for (int i = 0; i < matrix.rows * matrix.cols; ++i)
+        {
+            out.data[i] = exp_values[i] / sum;
+        }
+    }
+
+    void matrix_print(const Matrix &matrix)
+    {
+        for (int i = 0; i < matrix.rows; ++i)
+        {
+            for (int j = 0; j < matrix.cols; ++j)
+            {
+                std::cout << matrix.data[i * matrix.cols + j] << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
+
 }
+
+#endif // H_ITERA_MATRIX_H

@@ -6,56 +6,68 @@ using namespace math;
 
 int main(void)
 {
-    // Create two matrices for multiplication
-    math::Matrix matrix_a;
-    math::Matrix matrix_b;
-    math::Matrix matrix_c;
-    // Allocate matrices
-    
-    math::matrix_alloc(matrix_a, 2, 3); // 2x3 matrix
-    math::matrix_alloc(matrix_b, 3, 2); // 3x2 matrix
-    math::matrix_alloc(matrix_c, 2, 2);
+    math::Matrix mat;
 
-    // Fill matrix_a with values
-    matrix_a.data[0] = 1.0;
-    matrix_a.data[1] = 2.0;
-    matrix_a.data[2] = 3.0;
-    matrix_a.data[3] = 4.0;
-    matrix_a.data[4] = 5.0;
-    matrix_a.data[5] = 6.0;
+    // Allocate a 2x3 matrix
+    math::matrix_alloc(mat, 2, 3);
 
-    // Fill matrix_b with values
-    matrix_b.data[0] = 7.0;
-    matrix_b.data[1] = 8.0;
-    matrix_b.data[2] = 9.0;
-    matrix_b.data[3] = 10.0;
-    matrix_b.data[4] = 11.0;
-    matrix_b.data[5] = 12.0;
+    // Initialize the matrix with known values
+    mat.data[0] = 1.0;
+    mat.data[1] = -2.0;
+    mat.data[2] = 0.5;
+    mat.data[3] = 3.0;
+    mat.data[4] = -1.0;
+    mat.data[5] = 2.0;
 
-    // Expected result of matrix_a * matrix_b:
-    // [1*7 + 2*9 + 3*11, 1*8 + 2*10 + 3*12]
-    // [4*7 + 5*9 + 6*11, 4*8 + 5*10 + 6*12]
-    // = [58, 64]
-    //   [139, 154]
+    std::cout << "Original matrix:" << std::endl;
+    matrix_print(mat);
 
-    // Perform in-place matrix multiplication
-    math::matrix_prod(matrix_c, matrix_a, matrix_b);
+    // Apply ReLU
+    math::matrix_relu_in_place(mat);
+    std::cout << "After ReLU:" << std::endl;
+    matrix_print(mat);
 
-    // Print the result
-    std::cout << "Resultant matrix after multiplication:" << std::endl;
-    for (int i = 0; i < matrix_c.rows; ++i)
-    {
-        for (int j = 0; j < matrix_c.cols; ++j)
-        {
-            std::cout << matrix_c.data[i * matrix_c.cols + j] << " ";
-        }
-        std::cout << std::endl;
-    }
+    // Reinitialize matrix with original values for demonstration
+    mat.data[0] = 1.0;
+    mat.data[1] = -2.0;
+    mat.data[2] = 0.5;
+    mat.data[3] = 3.0;
+    mat.data[4] = -1.0;
+    mat.data[5] = 2.0;
+
+    // Apply Sigmoid
+    math::matrix_sigmoid_in_place(mat);
+    std::cout << "After Sigmoid:" << std::endl;
+    matrix_print(mat);
+
+    // Reinitialize matrix with original values for demonstration
+    mat.data[0] = 1.0;
+    mat.data[1] = -2.0;
+    mat.data[2] = 0.5;
+    mat.data[3] = 3.0;
+    mat.data[4] = -1.0;
+    mat.data[5] = 2.0;
+
+    // Apply Tanh
+    math::matrix_tanh_in_place(mat);
+    std::cout << "After Tanh:" << std::endl;
+    matrix_print(mat);
+
+    // Reinitialize matrix with original values for demonstration
+    mat.data[0] = 1.0;
+    mat.data[1] = -2.0;
+    mat.data[2] = 0.5;
+    mat.data[3] = 3.0;
+    mat.data[4] = -1.0;
+    mat.data[5] = 2.0;
+
+    // Apply Softmax
+    math::matrix_softmax_in_place(mat);
+    std::cout << "After Softmax:" << std::endl;
+    matrix_print(mat);
 
     // Free allocated memory
-    math::matrix_free(matrix_a);
-    math::matrix_free(matrix_b);
-    math::matrix_free(matrix_c);
+    math::matrix_free(mat);
 
     return 0;
 }
