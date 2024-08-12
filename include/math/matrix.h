@@ -58,19 +58,19 @@ namespace math
         return;
     }
 
-    // Adds the values of 'other' to 'some' if the matrices have matching sizes.
-    void matrix_add_inplace(Matrix &some, Matrix &other)
+    // Adds the values of 'b' to 'a' if the matrices have matching sizes.
+    void matrix_add_inplace(Matrix &a, Matrix &b)
     {
-        assert(some.data != nullptr);
-        assert(other.data != nullptr);
-        assert(some.rows > 0);
-        assert(some.cols > 0);
-        assert(some.rows == other.rows);
-        assert(some.cols == other.cols);
+        assert(a.data != nullptr);
+        assert(b.data != nullptr);
+        assert(a.rows > 0);
+        assert(a.cols > 0);
+        assert(a.rows == b.rows);
+        assert(a.cols == b.cols);
 
-        for (int i = 0; i < some.rows * some.cols; ++i)
+        for (int i = 0; i < a.rows * a.cols; ++i)
         {
-            some.data[i] += other.data[i];
+            a.data[i] += b.data[i];
         }
 
         return;
@@ -95,6 +95,7 @@ namespace math
         return;
     }
 
+    // In place multiplication 'left * right' if matrices sizes fit correctly.
     void matrix_prod_in_place(Matrix &left, Matrix &right)
     {
         assert(left.data != nullptr);
@@ -124,5 +125,49 @@ namespace math
         left.data = result.data;
         left.cols = right.cols;
         result.data = nullptr;
+    }
+
+    void matrix_add(Matrix &out, Matrix &a, Matrix &b)
+    {
+        assert(out.data != nullptr);
+        assert(a.data != nullptr);
+        assert(b.data != nullptr);
+        assert(out.rows > 0);
+        assert(out.cols > 0);
+        assert(out.rows == a.rows && a.rows == b.rows);
+        assert(out.cols == a.cols && a.cols == b.cols);
+
+        for (int i = 0; i < out.rows * out.cols; ++i)
+        {
+            out.data[i] = a.data[i] + b.data[i];
+        }
+
+        return;
+    }
+
+    void matrix_prod(Matrix &out, Matrix &a, Matrix &b)
+    {
+        assert(out.data != nullptr);
+        assert(a.data != nullptr);
+        assert(b.data != nullptr);
+        assert(out.rows > 0);
+        assert(out.cols > 0);
+        assert(a.cols == b.rows);
+        assert(out.rows == a.rows && out.cols == b.cols);
+
+        for (int i = 0; i < a.rows; ++i)
+        {
+            for (int j = 0; j < b.cols; ++j)
+            {
+                double accumulated = 0.0;
+                for (int k = 0; k < a.cols; ++k)
+                {
+                    accumulated += a.data[i * a.cols + k] * b.data[k * b.cols + j];
+                }
+                out.data[i * out.cols + j] = accumulated;
+            }
+        }
+
+        return;
     }
 }

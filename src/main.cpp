@@ -9,10 +9,12 @@ int main(void)
     // Create two matrices for multiplication
     math::Matrix matrix_a;
     math::Matrix matrix_b;
-
+    math::Matrix matrix_c;
     // Allocate matrices
+    
     math::matrix_alloc(matrix_a, 2, 3); // 2x3 matrix
     math::matrix_alloc(matrix_b, 3, 2); // 3x2 matrix
+    math::matrix_alloc(matrix_c, 2, 2);
 
     // Fill matrix_a with values
     matrix_a.data[0] = 1.0;
@@ -37,15 +39,15 @@ int main(void)
     //   [139, 154]
 
     // Perform in-place matrix multiplication
-    math::matrix_prod_in_place(matrix_a, matrix_b);
+    math::matrix_prod(matrix_c, matrix_a, matrix_b);
 
     // Print the result
     std::cout << "Resultant matrix after multiplication:" << std::endl;
-    for (int i = 0; i < matrix_a.rows; ++i)
+    for (int i = 0; i < matrix_c.rows; ++i)
     {
-        for (int j = 0; j < matrix_a.cols; ++j)
+        for (int j = 0; j < matrix_c.cols; ++j)
         {
-            std::cout << matrix_a.data[i * matrix_a.cols + j] << " ";
+            std::cout << matrix_c.data[i * matrix_c.cols + j] << " ";
         }
         std::cout << std::endl;
     }
@@ -53,6 +55,7 @@ int main(void)
     // Free allocated memory
     math::matrix_free(matrix_a);
     math::matrix_free(matrix_b);
+    math::matrix_free(matrix_c);
 
     return 0;
 }
