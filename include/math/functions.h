@@ -2,6 +2,7 @@
 #define H_ITERA_FUNCTIONS_H
 
 #include <cmath>
+#include <algorithm>
 
 namespace math
 {
@@ -33,6 +34,23 @@ namespace math
             return out_max;
 
         return scaled_value;
+    }
+
+    double median(std::vector<double> &scores)
+    {
+        assert(scores.size() != 0);
+
+        std::sort(scores.begin(), scores.end());
+
+        size_t n = scores.size();
+        if (n % 2 == 1)
+        {
+            return scores[n / 2];
+        }
+        else
+        {
+            return (scores[(n / 2) - 1] + scores[n / 2]) / 2.0;
+        }
     }
 }
 

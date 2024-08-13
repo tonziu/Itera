@@ -46,6 +46,43 @@ namespace network
         {
             return layers.size() == 0;
         }
+
+        int Num_Layers() const
+        {
+            return layers.size();
+        }
+
+        DenseLayer& Get_Layer(int index)
+        {
+            assert(index >= 0 && index < layers.size());
+
+            return layers[index];
+        }
+
+        void Mutation(double rate, double strength)
+        {
+            for (auto& layer : layers)
+            {
+                layer.Mutation(rate, strength);
+            }
+
+            return;
+        }
+
+        static NeuralNetwork Crossingover(NeuralNetwork& a, NeuralNetwork& b)
+        {
+            assert(a.Num_Layers() == b.Num_Layers());
+
+            NeuralNetwork network;
+
+            for (int i = 0; i < a.Num_Layers(); ++i)
+            {
+                DenseLayer child_layer = DenseLayer::Crossingover(a.Get_Layer(i), b.Get_Layer(i));
+                network.Add_Layer(child_layer);
+            }
+
+            return network;
+        }
     };
 }
 

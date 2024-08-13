@@ -366,16 +366,62 @@ namespace math
 
     void matrix_random_in_place(Matrix &m, double lower, double upper)
     {
-        std::random_device rd;                                          
-        std::mt19937 gen(rd());                                         
-        std::uniform_real_distribution<> dis(lower, upper); 
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<> dis(lower, upper);
 
         for (int i = 0; i < m.rows * m.cols; ++i)
         {
             m.data[i] = dis(gen);
         }
     }
-}
 
+    // It applies a random point crossover.
+    void matrix_crossover(const math::Matrix &parent1, const math::Matrix &parent2, math::Matrix &child)
+    {
+        assert(parent1.rows == parent2.rows && parent1.cols == parent2.cols);
+        assert(child.rows == parent1.rows && child.cols == parent1.cols);
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> row_dist(0, parent1.rows - 1);
+        std::uniform_int_distribution<> col_dist(0, parent1.cols - 1);
+
+        int crossover_row = row_dist(gen);
+        int crossover_col = col_dist(gen);
+
+        for (int i = 0; i < parent1.rows; ++i)
+        {
+            for (int j = 0; j < parent1.cols; ++j)
+            {
+                if (i < crossover_row || (i == crossover_row && j < crossover_col))
+                {
+                    child.data[i * child.cols + j] = parent1.data[i * parent1.cols + j];
+                }
+                else
+                {
+                    child.data[i * child.cols + j] = parent2.data[i * parent2.cols + j];
+                }
+            }
+        }
+    }
+
+    // Apply random mutation according to a 'mutation_rate' and a 'mutation_strength'.
+    void matrix_mutation(math::Matrix &m, double mutation_rate, double mutation_strength)
+    {
+        std::srand(static_cast<unsigned>(std::time(nullptr))); // Seed random number generator
+
+        int total_elements = m.rows * m.cols;
+
+        for (int i = 0; i < total_elements; ++i)
+        {
+            if (static_cast<double>(std::rand()) / RAND_MAX < mutation_rate)
+            {
+                double mutation = (static_cast<double>(std::rand()) / RAND_MAX - 0.5) * 2 * mutation_strength;
+                m.data[i] += mutation;
+            }
+        }
+    }
+}
 
 #endif // H_ITERA_MATRIX_H

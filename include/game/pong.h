@@ -128,8 +128,8 @@ namespace game
             ball.rect.x = game_width / 2 - ball.rect.width / 2;
             ball.rect.y = game_height / 2 - ball.rect.height / 2;
             ball.color = BLACK;
-            ball.dx = 7;
-            ball.dy = 8;
+            ball.dx = 10;
+            ball.dy = 10;
         }
 
         void setup_ai()
@@ -150,7 +150,7 @@ namespace game
 
             // Let's assume the AI output is in range [-1, 1], where:
             // -1 means move up, 1 means move down, 0 means stay
-            player.dy = move * 7.0f; // Scale the movement speed
+            player.dy = move * 10.0f; // Scale the movement speed
 
             player.rect.y += player.dy;
 
