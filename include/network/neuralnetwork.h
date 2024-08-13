@@ -41,6 +41,11 @@ namespace network
         {
             return layers.back().Get_Output().cols;
         }
+
+        bool Is_Empty() const
+        {
+            return layers.size() == 0;
+        }
     };
 }
 

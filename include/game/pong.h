@@ -32,16 +32,23 @@ namespace game
             default_properties();
         }
 
-        void Play(bool render = 1)
+        Pong(int game_width, int game_height, network::NeuralNetwork &ai)
+            : game_width(game_width), game_height(game_height), ai(ai)
+        {
+            default_properties();
+        }
+
+        double Play(bool render = 1)
         {
             setup(render);
             while (running)
             {
-                if (render && WindowShouldClose()) break;
+                if (render && WindowShouldClose())
+                    break;
 
+                update_ball();
                 update_state(state);
                 update_player();
-                update_ball();
 
                 running = !should_quit();
 
@@ -61,6 +68,8 @@ namespace game
             {
                 CloseWindow();
             }
+
+            return score;
         }
 
     private:
@@ -116,7 +125,7 @@ namespace game
         {
             ball.rect.width = 10;
             ball.rect.height = 10;
-            ball.rect.x = game_width / 2 - ball.rect.width/2;
+            ball.rect.x = game_width / 2 - ball.rect.width / 2;
             ball.rect.y = game_height / 2 - ball.rect.height / 2;
             ball.color = BLACK;
             ball.dx = 7;
@@ -125,6 +134,11 @@ namespace game
 
         void setup_ai()
         {
+            if (!ai.Is_Empty())
+                return;
+
+            std::cout << "Initializing default AI..." << std::endl;
+
             ai.Add_Layer(network::DenseLayer(6, 12, math::matrix_sigmoid_in_place));
             ai.Add_Layer(network::DenseLayer(12, 1, math::matrix_tanh_in_place));
         }
@@ -136,7 +150,7 @@ namespace game
 
             // Let's assume the AI output is in range [-1, 1], where:
             // -1 means move up, 1 means move down, 0 means stay
-            player.dy = move * 7.0f;  // Scale the movement speed
+            player.dy = move * 7.0f; // Scale the movement speed
 
             player.rect.y += player.dy;
 
@@ -175,11 +189,21 @@ namespace game
 
         void on_collide()
         {
-            ball.dx *= -1;
+            float paddle_center = player.rect.y + player.rect.height / 2;
+            float ball_center = ball.rect.y + ball.rect.height / 2;
+
+            // Normalize the impact position within the paddle
+            float impact_position = (ball_center - paddle_center) / (player.rect.height / 2);
+
+            // Reflect the ball's direction based on the impact position
+            ball.dx *= -1; // Reflect the ball horizontally
+
+            // Adjust the ball’s vertical speed based on where it hit the paddle
+            ball.dy = impact_position * 5; // Scale factor can be adjusted for desired effect
             score += 1.0;
         }
 
-        void update_state(math::Matrix& state)
+        void update_state(math::Matrix &state)
         {
             assert(state.rows == 1);
             assert(state.cols == 6);
@@ -194,21 +218,21 @@ namespace game
             normalize_state(state);
         }
 
-        void normalize_state(math::Matrix& state)
+        void normalize_state(math::Matrix &state)
         {
             assert(state.rows == 1);
             assert(state.cols == 6);
 
             // Player pos y
             state.data[0] = math::map_value(state.data[0],
-                                            0, 
+                                            0,
                                             game_height - player.rect.height,
                                             -1,
                                             1);
-            
+
             // Horizontal distance player-ball
             state.data[1] = math::map_value(state.data[1],
-                                            0, 
+                                            0,
                                             game_width - ball.rect.width - player.rect.x,
                                             -1,
                                             1);
@@ -216,10 +240,9 @@ namespace game
             // Vertical distance player-ball
             state.data[2] = math::map_value(state.data[2],
                                             0,
-                                            game_height-ball.rect.height,
+                                            game_height - ball.rect.height,
                                             -1,
                                             1);
-
         }
 
         bool should_quit()
