@@ -9,3 +9,5 @@ include_directories(include)
 set(MAIN_SRC_FILE src/main.cpp)
 
 add_executable(Itera ${MAIN_SRC_FILE})
+
+target_link_libraries(Itera -lraylib -lm -lpthread -ldl -lOpenGL -lX11)

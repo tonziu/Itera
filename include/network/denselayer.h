@@ -4,19 +4,17 @@
 #include <functional>
 #include <math/matrix.h>
 
-using Matrix = math::Matrix;
-
 namespace network
 {
     class DenseLayer
     {
     private:
-        Matrix weights;
-        Matrix biases;
-        Matrix output;
-        std::function<void(Matrix&)> activation;
+        math::Matrix weights;
+        math::Matrix biases;
+        math::Matrix output;
+        std::function<void(math::Matrix&)> activation;
     public:
-        DenseLayer(int input_size, int output_size, std::function<void(Matrix&)> activation)
+        DenseLayer(int input_size, int output_size, std::function<void(math::Matrix&)> activation)
             :activation(activation)
         {
             math::matrix_alloc(weights, input_size, output_size);
@@ -27,14 +25,14 @@ namespace network
             math::matrix_random_in_place(biases, -1.0, 1.0);
         }
 
-        void forward(Matrix& x)
+        void forward(math::Matrix& x)
         {
             matrix_prod(output, x, weights);
             matrix_add_in_place(output, biases);
             activation(output);
         }
 
-        Matrix Get_Output() const
+        math::Matrix Get_Output() const
         {
             return output;
         }

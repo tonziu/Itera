@@ -18,9 +18,12 @@ namespace network
             layers.push_back(layer);
         }
 
-        Matrix forward(const Matrix& input)
+        void forward(const math::Matrix& input, math::Matrix& output)
         {
-            Matrix current_input = input;
+            assert(output.rows == 1);
+            assert(output.cols == this->Get_Output_Size());
+
+            math::Matrix current_input = input;
             
             // Iterate through each layer and apply it to the current input
             for (auto& layer : layers)
@@ -31,7 +34,12 @@ namespace network
                 current_input = layer.Get_Output();
             }
             
-            return current_input;
+            math::matrix_copy(current_input, output);
+        }
+
+        int Get_Output_Size() const
+        {
+            return layers.back().Get_Output().cols;
         }
     };
 }
