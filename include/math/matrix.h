@@ -6,8 +6,11 @@
 #include <vector>
 #include <random>
 #include <ctime>
+#include <nlohmann/json.hpp>
 
 #include <math/functions.h>
+
+using json = nlohmann::json;
 
 namespace math
 {
@@ -421,6 +424,31 @@ namespace math
                 m.data[i] += mutation;
             }
         }
+    }
+
+    json matrix_serialize(math::Matrix &m)
+    {
+        json matrix_json;
+        matrix_json["rows"] = m.rows;
+        matrix_json["cols"] = m.cols;
+
+        // Convert the matrix data into a flat array
+        matrix_json["data"] = std::vector<double>(m.data, m.data + m.rows * m.cols);
+
+        return matrix_json;
+    }
+
+    math::Matrix matrix_deserialize(const json &matrix_json)
+    {
+        int rows = matrix_json["rows"];
+        int cols = matrix_json["cols"];
+        Matrix matrix;
+        math::matrix_alloc(matrix, rows, cols);
+
+        auto data = matrix_json["data"].get<std::vector<double>>();
+        std::copy(data.begin(), data.end(), matrix.data);
+
+        return matrix;
     }
 }
 

@@ -47,7 +47,8 @@ namespace game
             int num_iters = 0;
             while (running)
             {
-                if (++num_iters == max_iters) break;
+                if (++num_iters == max_iters)
+                    break;
 
                 if (render && WindowShouldClose())
                     break;
@@ -55,7 +56,7 @@ namespace game
                 update_ball();
                 update_state(state);
                 update_player();
-                
+
                 running = !should_quit();
 
                 if (!render)
@@ -125,7 +126,7 @@ namespace game
             player.rect.height = game_height * 0.15;
             player.rect.x = game_width / 10;
             player.rect.y = std::rand() % game_height - player.rect.height;
-            player.color = {103,179,181, 255};
+            player.color = {103, 179, 181, 255};
             player.dy = 0;
         }
 
@@ -135,7 +136,7 @@ namespace game
             ball.rect.height = ball.rect.width;
             ball.rect.x = game_width / 2 - ball.rect.width / 2;
             ball.rect.y = game_height / 2 - ball.rect.height / 2;
-            ball.color = {243,25,25, 255};
+            ball.color = {243, 25, 25, 255};
 
             std::srand(static_cast<unsigned>(std::time(0)));
 
@@ -150,8 +151,8 @@ namespace game
 
             std::cout << "Initializing default AI..." << std::endl;
 
-            ai.Add_Layer(network::DenseLayer(6, 12, math::matrix_sigmoid_in_place));
-            ai.Add_Layer(network::DenseLayer(12, 1, math::matrix_tanh_in_place));
+            ai.Add_Layer(network::DenseLayer(6, 12, "sigmoid"));
+            ai.Add_Layer(network::DenseLayer(12, 1, "tanh"));
         }
 
         void update_player()
@@ -186,13 +187,18 @@ namespace game
                 ball.dy *= -1;
             }
 
-            if (CheckCollisionRecs(player.rect, ball.rect))
+            if (ball.dx < 0 && CheckCollisionRecs(player.rect, ball.rect))
             {
                 on_collide();
             }
 
             ball.rect.x += ball.dx;
             ball.rect.y += ball.dy;
+        }
+
+        double ball_speed()
+        {
+            return sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
         }
 
         void on_collide()
@@ -203,15 +209,18 @@ namespace game
             float impact_position = (ball_center - paddle_center) / (player.rect.height / 2);
 
             ball.dx *= -1;
-            ball.rect.x == player.rect.x + player.rect.width + 1;
 
-            ball.dy += impact_position + (std::rand() % 5 - 2); 
+            ball.dy = impact_position * (game_height * 0.03) + ball.dy * 0.5f;
 
-            float random_angle = (std::rand() % 10 - 5) * 0.1f;
-            float new_dy = ball.dy + random_angle;
-            ball.dy = new_dy;
+            ball.dx *= 1.05f;
+            ball.dy *= 1.05f;
 
-            score += 1.0;
+            if (std::abs(ball.dy) < 1.0f)
+            {
+                ball.dy += (ball.dy < 0) ? -5.0f : 5.0f;
+            }
+
+            score += ball_speed() * 0.001;
         }
 
         void update_state(math::Matrix &state)
@@ -259,4 +268,5 @@ namespace game
         }
     };
 }
+
 #endif // H_ITERA_PONG_H

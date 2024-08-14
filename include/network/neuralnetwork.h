@@ -2,6 +2,10 @@
 #define H_ITERA_NEURAL_NETWORK_H
 
 #include <network/denselayer.h>
+#include <nlohmann/json.hpp>
+#include <fstream>
+
+using json = nlohmann::json;
 
 namespace network
 {
@@ -9,31 +13,41 @@ namespace network
     {
     private:
         std::vector<DenseLayer> layers;
-    
+
     public:
         NeuralNetwork() = default;
+        
+        // From Json file obtained through the 'Save_To_Json' method.
+        NeuralNetwork(const std::string &filename)
+        {
+            std::ifstream file(filename);
+            json network_json;
+            file >> network_json;
+
+            for (const auto &layer_json : network_json["layers"])
+            {
+                layers.push_back(DenseLayer(layer_json));
+            }
+        }
 
         void Add_Layer(DenseLayer layer)
         {
             layers.push_back(layer);
         }
 
-        void forward(const math::Matrix& input, math::Matrix& output)
+        void forward(const math::Matrix &input, math::Matrix &output)
         {
             assert(output.rows == 1);
             assert(output.cols == this->Get_Output_Size());
 
             math::Matrix current_input = input;
-            
-            // Iterate through each layer and apply it to the current input
-            for (auto& layer : layers)
+
+            for (auto &layer : layers)
             {
-                // Forward pass through the current layer
                 layer.forward(current_input);
-                // Update the current input to be the output of the layer
                 current_input = layer.Get_Output();
             }
-            
+
             math::matrix_copy(current_input, output);
         }
 
@@ -52,7 +66,7 @@ namespace network
             return layers.size();
         }
 
-        DenseLayer& Get_Layer(int index)
+        DenseLayer &Get_Layer(int index)
         {
             assert(index >= 0 && index < layers.size());
 
@@ -61,7 +75,7 @@ namespace network
 
         void Mutation(double rate, double strength)
         {
-            for (auto& layer : layers)
+            for (auto &layer : layers)
             {
                 layer.Mutation(rate, strength);
             }
@@ -69,7 +83,7 @@ namespace network
             return;
         }
 
-        static NeuralNetwork Crossingover(NeuralNetwork& a, NeuralNetwork& b)
+        static NeuralNetwork Crossingover(NeuralNetwork &a, NeuralNetwork &b)
         {
             assert(a.Num_Layers() == b.Num_Layers());
 
@@ -82,6 +96,20 @@ namespace network
             }
 
             return network;
+        }
+
+        void Save_To_Json(const std::string &filename)
+        {
+            json network_json;
+
+            for (auto &layer : layers)
+            {
+                json layer_json = layer.Serialize();
+                network_json["layers"].push_back(layer_json);
+            }
+
+            std::ofstream file(filename);
+            file << network_json.dump(4); // Pretty-print with an indent of 4 spaces
         }
     };
 }
