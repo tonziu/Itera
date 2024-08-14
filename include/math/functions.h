@@ -52,6 +52,42 @@ namespace math
             return (scores[(n / 2) - 1] + scores[n / 2]) / 2.0;
         }
     }
+
+    int argmax(std::vector<double> x)
+    {
+        assert(!x.empty());
+
+        int max_index = 0;
+        double max_value = x[0];
+
+        for (int i = 1; i < x.size(); ++i)
+        {
+            if (x[i] > max_value)
+            {
+                max_value = x[i];
+                max_index = i;
+            }
+        }
+
+        return max_index;
+    }
+
+    double max(std::vector<double> x)
+    {
+        assert(!x.empty());
+
+        double max_value = x[0];
+
+        for (int i = 1; i < x.size(); ++i)
+        {
+            if (x[i] > max_value)
+            {
+                max_value = x[i];
+            }
+        }
+
+        return max_value;
+    }
 }
 
 #endif // H_ITERA_FUNCTIONS_H

@@ -8,8 +8,8 @@
 
 void init_network(network::NeuralNetwork &network)
 {
-    // network.Add_Layer(network::DenseLayer(6, 1, math::matrix_sigmoid_in_place));
-    network.Add_Layer(network::DenseLayer(6, 1, math::matrix_tanh_in_place));
+    network.Add_Layer(network::DenseLayer(6, 8, math::matrix_tanh_in_place));
+    network.Add_Layer(network::DenseLayer(8, 1, math::matrix_tanh_in_place));
 }
 
 int main(void)
@@ -23,6 +23,8 @@ int main(void)
         init_network(network);
     }
 
+    double best = 0;
+
     while (true)
     {
         std::vector<double> scores = genetics::evaluate(networks);
@@ -31,7 +33,19 @@ int main(void)
         genetics::mutation(children, 0.01, 5);
         genetics::evolve(networks, children, scores);
 
-        std::cout << "Median score: " << math::median(scores) << "\n";
+        double median = math::median(scores);
+        double curr_best = math::max(scores);
+
+        std::cout << "Median score: " << median << "\n";
+        std::cout << "Maximum score: " << curr_best << "\n";
+        std::cout << "Overall best:" << best << "\n";
+
+        if (curr_best > best)
+        {
+            best = curr_best;
+            game::Pong demo(400, 400, networks[math::argmax(scores)]);
+            demo.Play(true);
+        }
     }
 
     return 0;

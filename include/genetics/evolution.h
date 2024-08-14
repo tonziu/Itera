@@ -14,14 +14,19 @@ namespace genetics
 {
     std::vector<double> evaluate(std::vector<network::NeuralNetwork>& networks)
     {
-        bool render_games = false;
+        bool render_games = 0;
         std::vector<double> scores;
+        int count = 0;
 
         for (auto &network : networks)
         {
             game::Pong game(400, 400, network);
             scores.push_back(game.Play(render_games));
         }
+
+
+        // game::Pong demo(400, 400, networks[math::argmax(scores)]);
+        // demo.Play(true);
 
         return scores;
     }

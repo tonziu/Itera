@@ -41,14 +41,17 @@ namespace game
         double Play(bool render = 1)
         {
             setup(render);
+            int num_iters = 0;
             while (running)
             {
+                if (++num_iters == max_iters) break;
+
                 if (render && WindowShouldClose())
                     break;
 
-                update_ball();
                 update_state(state);
                 update_player();
+                update_ball();
 
                 running = !should_quit();
 
@@ -84,12 +87,14 @@ namespace game
         math::Matrix ai_output;
         math::Matrix state;
         double score;
+        int max_iters;
 
         void default_properties()
         {
             fps = 30;
             bg_color = RAYWHITE;
             running = false;
+            max_iters = 1000;
         }
 
         void setup(bool render)
@@ -116,7 +121,7 @@ namespace game
             player.rect.width = 15;
             player.rect.height = 60;
             player.rect.x = game_width / 10;
-            player.rect.y = game_height / 2 - player.rect.height / 2;
+            player.rect.y = std::rand() % game_height - player.rect.height;
             player.color = BLACK;
             player.dy = 0;
         }
@@ -128,8 +133,12 @@ namespace game
             ball.rect.x = game_width / 2 - ball.rect.width / 2;
             ball.rect.y = game_height / 2 - ball.rect.height / 2;
             ball.color = BLACK;
-            ball.dx = 10;
-            ball.dy = 10;
+
+            std::srand(static_cast<unsigned>(std::time(0)));
+
+            // Randomize direction and speed
+            ball.dx = (std::rand() % 2 == 0 ? 1 : -1) * (10 + std::rand() % 5);
+            ball.dy = (std::rand() % 2 == 0 ? 1 : -1) * (5 + std::rand() % 5);
         }
 
         void setup_ai()
@@ -148,9 +157,11 @@ namespace game
             ai.forward(state, ai_output);
             double move = ai_output.data[0];
 
+            // std::cout << "Ai output: " << move << std::endl;
+
             // Let's assume the AI output is in range [-1, 1], where:
             // -1 means move up, 1 means move down, 0 means stay
-            player.dy = move * 10.0f; // Scale the movement speed
+            player.dy = move * 15.0f; // Scale the movement speed
 
             player.rect.y += player.dy;
 
@@ -197,9 +208,16 @@ namespace game
 
             // Reflect the ball's direction based on the impact position
             ball.dx *= -1; // Reflect the ball horizontally
+            ball.rect.x == player.rect.x + player.rect.width + 0.1;
 
-            // Adjust the ball’s vertical speed based on where it hit the paddle
-            ball.dy = impact_position * 5; // Scale factor can be adjusted for desired effect
+            // Introduce some randomness into the ball's vertical speed after collision
+            ball.dy += impact_position + (std::rand() % 5 - 2); // Add randomness between -2 and 2
+
+            // Randomize ball direction slightly upon collision
+            float random_angle = (std::rand() % 10 - 5) * 0.1f; // Random angle between -0.5 and 0.5
+            float new_dy = ball.dy + random_angle;
+            ball.dy = new_dy;
+
             score += 1.0;
         }
 
