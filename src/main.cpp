@@ -36,14 +36,14 @@ int main(void)
         double median = math::median(scores);
         double curr_best = math::max(scores);
 
-        std::cout << "Median score: " << median << "\n";
+        std::cout << "\nMedian score: " << median << "\n";
         std::cout << "Maximum score: " << curr_best << "\n";
-        std::cout << "Overall best:" << best << "\n";
+        std::cout << "Overall best:" << best << "\n\n";
 
         if (curr_best > best)
         {
             best = curr_best;
-            game::Pong demo(400, 400, networks[math::argmax(scores)]);
+            game::Pong demo(GAME_WIDTH, GAME_HEIGHT, networks[math::argmax(scores)]);
             demo.Play(true);
         }
     }

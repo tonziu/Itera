@@ -6,6 +6,9 @@
 #include <math/matrix.h>
 #include <network/neuralnetwork.h>
 
+#define GAME_WIDTH 600
+#define GAME_HEIGHT 600
+
 namespace game
 {
     typedef struct Paddle
@@ -49,10 +52,10 @@ namespace game
                 if (render && WindowShouldClose())
                     break;
 
+                update_ball();
                 update_state(state);
                 update_player();
-                update_ball();
-
+                
                 running = !should_quit();
 
                 if (!render)
@@ -92,7 +95,7 @@ namespace game
         void default_properties()
         {
             fps = 30;
-            bg_color = RAYWHITE;
+            bg_color = {1, 1, 2, 255};
             running = false;
             max_iters = 1000;
         }
@@ -118,27 +121,26 @@ namespace game
 
         void setup_player()
         {
-            player.rect.width = 15;
-            player.rect.height = 60;
+            player.rect.width = game_width * 0.025;
+            player.rect.height = game_height * 0.15;
             player.rect.x = game_width / 10;
             player.rect.y = std::rand() % game_height - player.rect.height;
-            player.color = BLACK;
+            player.color = {103,179,181, 255};
             player.dy = 0;
         }
 
         void setup_ball()
         {
-            ball.rect.width = 10;
-            ball.rect.height = 10;
+            ball.rect.width = game_width * 0.02;
+            ball.rect.height = ball.rect.width;
             ball.rect.x = game_width / 2 - ball.rect.width / 2;
             ball.rect.y = game_height / 2 - ball.rect.height / 2;
-            ball.color = BLACK;
+            ball.color = {243,25,25, 255};
 
             std::srand(static_cast<unsigned>(std::time(0)));
 
-            // Randomize direction and speed
-            ball.dx = (std::rand() % 2 == 0 ? 1 : -1) * (10 + std::rand() % 5);
-            ball.dy = (std::rand() % 2 == 0 ? 1 : -1) * (5 + std::rand() % 5);
+            ball.dx = (std::rand() % 2 == 0 ? 1 : -1) * (game_width * 0.0375 + std::rand() % game_width * 0.015);
+            ball.dy = (std::rand() % 2 == 0 ? 1 : -1) * (game_height * 0.015 + std::rand() % game_height * 0.015);
         }
 
         void setup_ai()
@@ -157,15 +159,10 @@ namespace game
             ai.forward(state, ai_output);
             double move = ai_output.data[0];
 
-            // std::cout << "Ai output: " << move << std::endl;
-
-            // Let's assume the AI output is in range [-1, 1], where:
-            // -1 means move up, 1 means move down, 0 means stay
-            player.dy = move * 15.0f; // Scale the movement speed
+            player.dy = move * (game_height * 0.0375); // assuming the ai output in interval [-1, +1]
 
             player.rect.y += player.dy;
 
-            // Keep the paddle within the screen boundaries
             if (player.rect.y < 0)
                 player.rect.y = 0;
             if (player.rect.y + player.rect.height > game_height)
@@ -203,18 +200,14 @@ namespace game
             float paddle_center = player.rect.y + player.rect.height / 2;
             float ball_center = ball.rect.y + ball.rect.height / 2;
 
-            // Normalize the impact position within the paddle
             float impact_position = (ball_center - paddle_center) / (player.rect.height / 2);
 
-            // Reflect the ball's direction based on the impact position
-            ball.dx *= -1; // Reflect the ball horizontally
-            ball.rect.x == player.rect.x + player.rect.width + 0.1;
+            ball.dx *= -1;
+            ball.rect.x == player.rect.x + player.rect.width + 1;
 
-            // Introduce some randomness into the ball's vertical speed after collision
-            ball.dy += impact_position + (std::rand() % 5 - 2); // Add randomness between -2 and 2
+            ball.dy += impact_position + (std::rand() % 5 - 2); 
 
-            // Randomize ball direction slightly upon collision
-            float random_angle = (std::rand() % 10 - 5) * 0.1f; // Random angle between -0.5 and 0.5
+            float random_angle = (std::rand() % 10 - 5) * 0.1f;
             float new_dy = ball.dy + random_angle;
             ball.dy = new_dy;
 
@@ -241,21 +234,18 @@ namespace game
             assert(state.rows == 1);
             assert(state.cols == 6);
 
-            // Player pos y
             state.data[0] = math::map_value(state.data[0],
                                             0,
                                             game_height - player.rect.height,
                                             -1,
                                             1);
 
-            // Horizontal distance player-ball
             state.data[1] = math::map_value(state.data[1],
                                             0,
                                             game_width - ball.rect.width - player.rect.x,
                                             -1,
                                             1);
 
-            // Vertical distance player-ball
             state.data[2] = math::map_value(state.data[2],
                                             0,
                                             game_height - ball.rect.height,

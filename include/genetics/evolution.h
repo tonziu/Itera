@@ -20,13 +20,9 @@ namespace genetics
 
         for (auto &network : networks)
         {
-            game::Pong game(400, 400, network);
+            game::Pong game(GAME_WIDTH, GAME_HEIGHT, network);
             scores.push_back(game.Play(render_games));
         }
-
-
-        // game::Pong demo(400, 400, networks[math::argmax(scores)]);
-        // demo.Play(true);
 
         return scores;
     }
@@ -39,7 +35,6 @@ namespace genetics
         std::vector<int> indices(scores.size());
         std::iota(indices.begin(), indices.end(), 0);
 
-        // Sort indices based on scores in descending order
         std::sort(indices.begin(), indices.end(), [&scores](int a, int b)
                   { return scores[a] > scores[b]; });
 
@@ -47,10 +42,9 @@ namespace genetics
         std::vector<double> probabilities(scores.size());
         double total_rank = 0.0;
 
-        // Compute ranks and normalize probabilities
         for (int i = 0; i < scores.size(); ++i)
         {
-            int rank = scores.size() - i; // Higher score gets a higher rank
+            int rank = scores.size() - i;
             total_rank += rank;
             probabilities[i] = rank;
         }
