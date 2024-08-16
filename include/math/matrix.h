@@ -385,19 +385,12 @@ namespace math
         assert(parent1.rows == parent2.rows && parent1.cols == parent2.cols);
         assert(child.rows == parent1.rows && child.cols == parent1.cols);
 
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> row_dist(0, parent1.rows - 1);
-        std::uniform_int_distribution<> col_dist(0, parent1.cols - 1);
-
-        int crossover_row = row_dist(gen);
-        int crossover_col = col_dist(gen);
-
         for (int i = 0; i < parent1.rows; ++i)
         {
             for (int j = 0; j < parent1.cols; ++j)
             {
-                if (i < crossover_row || (i == crossover_row && j < crossover_col))
+                // Alternate between parents based on index sum
+                if ((i + j) % 2 == 0)
                 {
                     child.data[i * child.cols + j] = parent1.data[i * parent1.cols + j];
                 }

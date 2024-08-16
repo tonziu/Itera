@@ -9,28 +9,23 @@
 
 #include <game/pong.h>
 #include <network/neuralnetwork.h>
+#include <common.h>
 
 namespace genetics
 {
-    std::vector<double> evaluate(std::vector<network::NeuralNetwork>& networks)
+    void evaluate(std::vector<network::NeuralNetwork> &networks, std::vector<double>& scores, common::SimInfo& info)
     {
-        bool render_games = 0;
-        std::vector<double> scores;
-        int count = 0;
-
-        for (auto &network : networks)
+        for (int i = 0; i < networks.size(); ++i)
         {
-            game::Pong game(GAME_WIDTH, GAME_HEIGHT, network);
-            scores.push_back(game.Play(render_games));
+            game::Pong game(GAME_WIDTH, GAME_HEIGHT, networks[i]);
+            scores[i] = game.Play(info);
         }
-
-        return scores;
     }
 
-    std::vector<network::NeuralNetwork> selection(std::vector<network::NeuralNetwork>& networks, std::vector<double>& scores, int num_selected)
+    std::vector<network::NeuralNetwork> selection(std::vector<network::NeuralNetwork> &networks, std::vector<double> &scores, int num_selected)
     {
         assert(scores.size() == networks.size());
-        assert(num_selected < networks.size());
+        assert(num_selected <= networks.size());
 
         std::vector<int> indices(scores.size());
         std::iota(indices.begin(), indices.end(), 0);
@@ -38,7 +33,15 @@ namespace genetics
         std::sort(indices.begin(), indices.end(), [&scores](int a, int b)
                   { return scores[a] > scores[b]; });
 
-        // Rank-based selection probabilities
+        // Elitism: directly add the best-performing networks
+        std::vector<network::NeuralNetwork> selected_networks;
+        int num_elites = num_selected / 10;
+        for (int i = 0; i < num_elites; ++i)
+        {
+            selected_networks.push_back(networks[indices[i]]);
+        }
+
+        // Rank-based selection for the remaining slots
         std::vector<double> probabilities(scores.size());
         double total_rank = 0.0;
 
@@ -54,11 +57,10 @@ namespace genetics
             prob /= total_rank;
         }
 
-        std::vector<network::NeuralNetwork> selected_networks;
         std::default_random_engine generator;
         std::discrete_distribution<int> distribution(probabilities.begin(), probabilities.end());
 
-        for (int i = 0; i < num_selected; ++i)
+        for (int i = num_elites; i < num_selected; ++i)
         {
             int selected_index = distribution(generator);
             selected_networks.push_back(networks[selected_index]);
@@ -67,7 +69,7 @@ namespace genetics
         return selected_networks;
     }
 
-    std::vector<network::NeuralNetwork> crossingover(std::vector<network::NeuralNetwork>& parents)
+    std::vector<network::NeuralNetwork> crossingover(std::vector<network::NeuralNetwork> &parents)
     {
         assert(parents.size() % 2 == 0);
 
@@ -81,15 +83,15 @@ namespace genetics
         return children;
     }
 
-    void mutation(std::vector<network::NeuralNetwork>& networks, double rate, double strength)
+    void mutation(std::vector<network::NeuralNetwork> &networks, double rate, double strength)
     {
-        for (auto& network : networks)
+        for (auto &network : networks)
         {
             network.Mutation(rate, strength);
         }
     }
 
-    void evolve(std::vector<network::NeuralNetwork>& networks, std::vector<network::NeuralNetwork>& children, std::vector<double>& scores)
+    void evolve(std::vector<network::NeuralNetwork> &networks, std::vector<network::NeuralNetwork> &children, std::vector<double> &scores)
     {
         assert(networks.size() == scores.size());
         assert(children.size() <= networks.size());
@@ -105,7 +107,7 @@ namespace genetics
         int num_replacements = children.size();
         for (int i = 0; i < num_replacements; ++i)
         {
-            int index_to_replace = indexed_scores[i].second; 
+            int index_to_replace = indexed_scores[i].second;
             networks[index_to_replace] = children[i];
         }
 
