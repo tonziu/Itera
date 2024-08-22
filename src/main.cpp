@@ -10,8 +10,7 @@
 void init_network(network::NeuralNetwork &network)
 {
     network.Add_Layer(network::DenseLayer(6, 24, "tanh"));
-    network.Add_Layer(network::DenseLayer(24, 12, "sigmoid"));
-    network.Add_Layer(network::DenseLayer(12, 6, "sigmoid"));
+    network.Add_Layer(network::DenseLayer(24, 6, "sigmoid"));
     network.Add_Layer(network::DenseLayer(6, 1, "tanh"));
 }
 
